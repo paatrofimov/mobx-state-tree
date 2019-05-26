@@ -3,6 +3,8 @@
     "version": "2.2.0",
     "private": true,
     "devDependencies": {
+        "@types/classnames": "^2.2.7",
+        "@types/react": "^16.8.17",
         "react-scripts": "^2.1.8"
     },
     "dependencies": {
@@ -14,7 +16,8 @@
         "react": "^16.8.4",
         "react-dom": "^16.8.4",
         "remotedev": "^0.2.9",
-        "todomvc-app-css": "^2.2.0"
+        "todomvc-app-css": "^2.2.0",
+        "typescript": "^3.4.5"
     },
     "scripts": {
         "start": "react-scripts start",
