@@ -1,37 +1,82 @@
-import { observable } from "mobx"
+import {types} from "mobx-state-tree";
 
-export const initialState : Data = {
-    person: {
-        fio: {
-            surname: "sur1",
-            name: "name1",
-            patronymic: "patro1"
+function unionUndefined(...otherTypes: any[]) {
+    return unionSomeType(types.undefined, ...otherTypes);
+}
+
+function unionSomeType(someType: any, ...otherTypes: any[]) {
+    return types.union(someType, ...otherTypes);
+}
+
+function optionalObject(type: any, defaultVal: any = {}) {
+    return optional(defaultVal, type)
+}
+
+function optionalString(type: any, defaultVal: string = '') {
+    return optional(defaultVal, types.string)
+}
+
+function optional(defaultObj: any, type: any) {
+    return types.optional(type, defaultObj);
+}
+
+export const DataFactory = types.model({
+    todo: optionalObject(
+        types.model({
+            text: optionalString(types.string)
+        })
+    ),
+    person: optionalObject(
+        types.model({
+            fio: optionalObject(
+                types.model({
+                    surname: optionalString(types.string),
+                    name: optionalString(types.string),
+                    patronymic: optionalString(types.string),
+                }),
+            )
+        }),
+    )
+});
+
+export const StoreFactory = types.model({
+    Data: types.optional(DataFactory, {})
+});
+
+export const initialState: MyStore = {
+    Data: {
+        person: {
+            fio: {
+                surname: "sur1",
+                name: "name1",
+                patronymic: "patro1"
+            }
+        },
+        todo: {
+            text: "first"
         }
-    },
-    todo: {
-        text: "first"
     }
 }
 
-export class TodoItemImpl {
-    @observable text: string = ""
+export interface TodoItem {
+    text?: string;
 }
 
-export class PersonImpl {
-    @observable fio: FioImpl = new FioImpl()
+export interface Person {
+    fio?: Fio;
 }
 
-export class FioImpl {
-    @observable surname: string = ""
-    @observable patronymic: string = ""
-    @observable name: string = ""
+export interface Fio {
+    surname?: string
+    patronymic?: string
+    name?: string
 }
 
-export class Data {
-    @observable todo: TodoItemImpl = new TodoItemImpl()
-    @observable person: PersonImpl = new PersonImpl()
+export interface Data {
+    todo?: TodoItem
+    person?: Person
 }
 
-export class MyStore {
-    @observable Data: Data = new Data()
+export interface MyStore {
+    Data: Data;
 }

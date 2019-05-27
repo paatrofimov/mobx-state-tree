@@ -1,27 +1,32 @@
 import React from "react"
-import { inject, observer } from "mobx-react"
-import { devLogVerbose } from ".."
-import { FioImpl } from "./MyStore"
-import { HasValue } from "./App"
+import {inject, observer} from "mobx-react"
+import {devLogVerbose} from ".."
+import {BindingProps, bindPath} from "./App"
+import StringInput from "./StringInput";
+import {Fio, Person} from "./MyStore";
+import * as _ from "lodash";
+import {FunctionHelper} from "./FunctionHelper";
 
 @inject(stores => stores)
 @observer
 @devLogVerbose
-export default class Fio extends React.Component<HasValue<FioImpl>> {
+export default class FioComponent extends React.Component<BindingProps<Person>> {
 
     render() {
-        const { value } = this.props
+        const {bindingRoot, bindingPath} = this.props;
+
+        const fio: Fio = _.get(bindingRoot, FunctionHelper.getPath(bindingPath));
 
         return (
             <div className="view">
-                <input value={value.name}
-                       onChange={(v) => value.name = v.target.value}
+                <StringInput bindingRoot={fio}
+                             bindingPath={bindPath<Fio>(x => x.name)}
                 />
-                <input value={value.surname}
-                       onChange={(v) => value.surname = v.target.value}
+                <StringInput bindingRoot={fio}
+                             bindingPath={bindPath<Fio>(x => x.patronymic)}
                 />
-                <input value={value.patronymic}
-                       onChange={(v) => value.patronymic = v.target.value}
+                <StringInput bindingRoot={fio}
+                             bindingPath={bindPath<Fio>(x => x.surname)}
                 />
             </div>
         )

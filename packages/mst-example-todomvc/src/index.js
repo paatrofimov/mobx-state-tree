@@ -1,15 +1,15 @@
 import React from "react"
-import { Provider } from "mobx-react"
-import { render } from "react-dom"
+import {Provider} from "mobx-react"
+import {render} from "react-dom"
 import "todomvc-app-css/index.css"
 import App from "./components/App"
-import { MyStore, initialState } from "./components/MyStore"
+import {initialState, StoreFactory} from "./components/MyStore"
 
 let store
 
 function createTodoStore() {
-    store = new MyStore()
-    store.Data = initialState;
+    store = StoreFactory.create(initialState)
+    console.log(store);
     return store
 }
 
@@ -31,14 +31,14 @@ if (module.hot) {
 
 export function devLogVerbose(Component) {
     const oldRender = Component.prototype.render
-    Component.prototype.render = function() {
+    Component.prototype.render = function () {
         console.log(`${new Date().toISOString()} - render ${Component.name}`)
         return oldRender.apply(this)
     }
 
     const oldWillReceiveProps = Component.prototype.componentWillReceiveProps
     if (oldWillReceiveProps)
-        Component.prototype.componentWillReceiveProps = function(nextProps) {
+        Component.prototype.componentWillReceiveProps = function (nextProps) {
             console.groupCollapsed(`${new Date().toISOString()} - componentWillReceiveProps ${Component.name}`)
             console.group("current props")
             console.log(this.props)
@@ -50,7 +50,7 @@ export function devLogVerbose(Component) {
         }
 
     const oldForceUpdate = Component.prototype.forceUpdate
-    Component.prototype.forceUpdate = function() {
+    Component.prototype.forceUpdate = function () {
         console.log(`${new Date().toISOString()} - forceUpdate ${Component.name}`)
         return oldForceUpdate.apply(this)
     }
