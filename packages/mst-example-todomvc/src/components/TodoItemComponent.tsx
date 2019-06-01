@@ -1,24 +1,15 @@
 import React from "react"
-import {inject, observer} from "mobx-react"
-import {devLogVerbose} from ".."
-import {BindingProps, bindPath} from "./App"
+import {observerComponent} from "./ObserverComponentDecorator";
 import StringInput from "./StringInput";
-import {Data, TodoItem} from "./MyStore";
-import * as _ from "lodash";
-import {FunctionHelper} from "./FunctionHelper";
+import {TodoItem} from "./DataStore";
+import {bindChildWithChange, BindingProps} from "./Binding";
 
-@inject(stores => stores)
-@observer
-@devLogVerbose
-export default class TodoItemComponent extends React.Component<BindingProps<Data>> {
+@observerComponent
+export default class TodoItemComponent extends React.Component<BindingProps<TodoItem>> {
     render() {
-        const {bindingRoot, bindingPath} = this.props
-
-        const item: TodoItem = _.get(bindingRoot, FunctionHelper.getPath(bindingPath));
-
         return (
             <div className="view">
-                <StringInput bindingRoot={item} bindingPath={bindPath<TodoItem>(x => x.text)}/>
+                <StringInput {...bindChildWithChange(this.props, x => x.text!)}/>
             </div>
         )
     }

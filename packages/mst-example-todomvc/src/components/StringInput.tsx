@@ -1,22 +1,15 @@
 import React from "react"
-import {inject, observer} from "mobx-react"
-import {devLogVerbose} from ".."
-import {BindingProps} from "./App"
-import * as _ from "lodash";
-import {FunctionHelper} from "./FunctionHelper";
+import {observerComponent} from "./ObserverComponentDecorator";
+import {BindingPropsWithChange, getBoundValue} from "./Binding";
 
-@inject(stores => stores)
-@observer
-@devLogVerbose
-export default class StringInput extends React.Component<BindingProps & React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>> {
+@observerComponent
+export default class StringInput extends React.Component<BindingPropsWithChange, React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>> {
     render() {
-        const {bindingRoot, onChange, bindingPath} = this.props
-
-        const value = _.get(bindingRoot, FunctionHelper.getPath(bindingPath));
+        const {onChange} = this.props;
 
         return (
             <div className="view">
-                <input value={value} onChange={onChange}/>
+                <input value={getBoundValue(this.props)} onChange={onChange}/>
             </div>
         )
     }

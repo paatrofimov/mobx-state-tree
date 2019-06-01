@@ -1,48 +1,37 @@
-import {inject, observer} from "mobx-react"
 import React from "react"
-import {devLogVerbose} from ".."
-import Person, {default as PersonComponent} from "./PersonComponent"
-import {Data, DataFactory, MyStore} from "./MyStore"
+import {default as PersonComponent} from "./PersonComponent"
+import {Data, DataModel, HasDataStore} from "./DataStore"
 import TodoItemComponent from "./TodoItemComponent"
-import deepExtend from "deep-extend";
+import {StupidInnerTextArrayComponent, StupidTextArrayComponent} from "./StupidTextComponent";
+import {bind} from "./Binding";
+import {observerComponent} from "./ObserverComponentDecorator";
 
-export function bindPath<Root, Value = any>(fn: (x: Root) => Value) {
-    return fn;
-}
-
-export interface BindingProps<Root = any> {
-    bindingRoot: Root;
-    bindingPath: <Root, BoundValue>(root: Root) => BoundValue;
-}
-
-class App extends React.Component<{ store: MyStore }> {
+class App extends React.Component {
     render() {
-        return <PersonWithItem store={this.props.store}/>
+        return <PersonWithItem/>
     }
 }
 
-@inject(stores => stores)
-@observer
-@devLogVerbose
-class PersonWithItem extends React.Component<{ store: MyStore }> {
+@observerComponent
+class PersonWithItem extends React.Component<HasDataStore> {
 
-    mergeFetchedDataWithStoredData(fetched: Data) {
-        const {Data} = this.props.store;
-        const extendedFetchedData = DataFactory.create(fetched);
-        console.log(extendedFetchedData);
-        deepExtend(Data, extendedFetchedData);
-        console.log(Data);
+    merge(fetchedData: Data) {
+        (this.props.store!.Data as any).mergeFetchedDataWithStoredData(fetchedData);
     }
 
     render(): JSX.Element {
-        const {Data} = this.props.store;
+        const {store} = this.props;
+        const {Data} = store!;
 
         return (
             <div>
-                <PersonComponent bindingPath={bindPath<Data>(x => x.person)} bindingRoot={Data}/>
-                <TodoItemComponent bindingPath={bindPath<Data>(x => x.todo)} bindingRoot={Data}/>
+                <PersonComponent {...bind(Data, x => x.person!)}/>
+                <TodoItemComponent {...bind(Data, x => x.todo!)}/>
+                <StupidTextArrayComponent {...bind(Data, x => x.textArray!)}/>
+                <StupidInnerTextArrayComponent {...bind(Data, x => x.innerTextArray!)}/>
+                <br/>
                 <button onClick={() => {
-                    const fetchedData: Data = {
+                    const fetchedData: DataModel = {
                         person: {
                             fio: {
                                 surname: "sur1",
@@ -54,12 +43,13 @@ class PersonWithItem extends React.Component<{ store: MyStore }> {
                             text: "first"
                         }
                     };
-                    this.mergeFetchedDataWithStoredData(fetchedData);
+                    this.merge(fetchedData);
                 }}>
                     fetch same data
                 </button>
+                <br/>
                 <button onClick={() => {
-                    const fetchedData: Data = {
+                    const fetchedData: DataModel = {
                         person: {
                             fio: {
                                 surname: "sur1",
@@ -71,12 +61,13 @@ class PersonWithItem extends React.Component<{ store: MyStore }> {
                             text: "second"
                         }
                     };
-                    this.mergeFetchedDataWithStoredData(fetchedData);
+                    this.merge(fetchedData);
                 }}>
                     fetch same person other todo
                 </button>
+                <br/>
                 <button onClick={() => {
-                    const fetchedData: Data = {
+                    const fetchedData: DataModel = {
                         person: {
                             fio: {
                                 surname: "sur1",
@@ -85,12 +76,13 @@ class PersonWithItem extends React.Component<{ store: MyStore }> {
                             }
                         },
                     };
-                    this.mergeFetchedDataWithStoredData(fetchedData);
+                    this.merge(fetchedData);
                 }}>
                     fetch same person no todo
                 </button>
+                <br/>
                 <button onClick={() => {
-                    const fetchedData: Data = {
+                    const fetchedData: DataModel = {
                         person: {
                             fio: {
                                 surname: "sur3",
@@ -100,12 +92,13 @@ class PersonWithItem extends React.Component<{ store: MyStore }> {
                             text: "first"
                         }
                     };
-                    this.mergeFetchedDataWithStoredData(fetchedData);
+                    this.merge(fetchedData);
                 }}>
                     fetch person with only surname
                 </button>
+                <br/>
                 <button onClick={() => {
-                    const fetchedData: Data = {
+                    const fetchedData: DataModel = {
                         person: {
                             fio: {
                                 surname: "sur5",
@@ -117,10 +110,381 @@ class PersonWithItem extends React.Component<{ store: MyStore }> {
                             text: "first"
                         }
                     };
-                    this.mergeFetchedDataWithStoredData(fetchedData);
+                    this.merge(fetchedData);
                 }}>
                     fetch same person with diff surname
                 </button>
+                <br/>
+                <button onClick={() => {
+                    const fetchedData: DataModel = {
+                        person: {
+                            fio: {
+                                surname: "sur1",
+                                name: "name1",
+                                patronymic: "patro1"
+                            }
+                        },
+                        todo: {
+                            text: "first"
+                        },
+                        textArray: [
+                            {
+                                inner: {value: '1'},
+                            },
+                            {
+                                inner: {value: '2'},
+                            },
+                            {
+                                inner: {value: '3'},
+                            },
+                            {
+                                inner: {value: '4'},
+                            }]
+                    };
+                    this.merge(fetchedData);
+                }}>
+                    fetch same text array
+                </button>
+                <br/>
+                <button onClick={() => {
+                    const fetchedData: DataModel = {
+                        person: {
+                            fio: {
+                                surname: "sur1",
+                                name: "name1",
+                                patronymic: "patro1"
+                            }
+                        },
+                        todo: {
+                            text: "first"
+                        },
+                        textArray: [
+                            {
+                                inner: {value: '1'},
+                            },
+                            {
+                                inner: {value: '2'},
+                            },
+                            {
+                                inner: {value: '7'},
+                            },
+                            {
+                                inner: {value: '4'},
+                            }]
+                    };
+                    this.merge(fetchedData);
+                }}>
+                    fetch different text array same size
+                </button>
+                <br/>
+                <button onClick={() => {
+                    const fetchedData: DataModel = {
+                        person: {
+                            fio: {
+                                surname: "sur1",
+                                name: "name1",
+                                patronymic: "patro1"
+                            }
+                        },
+                        todo: {
+                            text: "first"
+                        },
+                        textArray: [
+                            {
+                                inner: {value: '1'},
+                            },
+                            {
+                                inner: {value: '2'},
+                            },
+                            {
+                                inner: {value: '7'},
+                            }]
+                    };
+                    this.merge(fetchedData);
+                }}>
+                    fetch different text array less size
+                </button>
+                <br/>
+                <button onClick={() => {
+                    const fetchedData: DataModel = {
+                        person: {
+                            fio: {
+                                surname: "sur1",
+                                name: "name1",
+                                patronymic: "patro1"
+                            }
+                        },
+                        todo: {
+                            text: "first"
+                        },
+                        textArray: [
+                            {
+                                inner: {value: '1'},
+                            },
+                            {
+                                inner: {value: '2'},
+                            },
+                            {
+                                inner: {value: '3'},
+                            }]
+                    };
+                    this.merge(fetchedData);
+                }}>
+                    fetch same text array less size
+                </button>
+                <br/>
+                <button onClick={() => {
+                    const fetchedData: DataModel = {
+                        person: {
+                            fio: {
+                                surname: "sur1",
+                                name: "name1",
+                                patronymic: "patro1"
+                            }
+                        },
+                        todo: {
+                            text: "first"
+                        },
+                        textArray: [
+                            {
+                                inner: {value: '1'},
+                            },
+                            {
+                                inner: {value: '2'},
+                            },
+                            {
+                                inner: {value: '3'},
+                            },
+                            {
+                                inner: {value: '4'},
+                            },
+                            {
+                                inner: {value: '5'},
+                            },]
+                    };
+                    this.merge(fetchedData);
+                }}>
+                    fetch same text array greater size
+                </button>
+                <br/>
+                <button onClick={() => {
+                    const fetchedData: DataModel = {
+                        person: {
+                            fio: {
+                                surname: "sur1",
+                                name: "name1",
+                                patronymic: "patro1"
+                            }
+                        },
+                        todo: {
+                            text: "first"
+                        },
+                        textArray: [
+                            {
+                                inner: {value: '9'},
+                            },
+                            {
+                                inner: {value: '2'},
+                            },
+                            {
+                                inner: {value: '3'},
+                            },
+                            {
+                                inner: {value: '4'},
+                            },
+                            {
+                                inner: {value: '5'},
+                            },]
+                    };
+                    this.merge(fetchedData);
+                }}>
+                    fetch different text array greater size
+                </button>
+                <br/>
+                <button onClick={() => {
+                    const fetchedData: DataModel = {
+                        person: {
+                            fio: {
+                                surname: "sur1",
+                                name: "name1",
+                                patronymic: "patro1"
+                            }
+                        },
+                        todo: {
+                            text: "first"
+                        },
+                        textArray: [
+                            {
+                                inner: {value: '1'},
+                            },
+                            {
+                                inner: {value: '2'},
+                            },
+                            {
+                                inner: {value: '3'},
+                            },
+                            {
+                                inner: {value: '4'},
+                            }]
+                        ,
+                        innerTextArray: [
+                            {
+                                value: '88',
+                            },
+                            {
+                                value: '000',
+                            },
+                            {
+                                value: '66',
+                            },
+                            {
+                                value: '55',
+                            },
+                        ]
+                    };
+                    this.merge(fetchedData);
+                }}>
+                    fetch different inner text array same size
+                </button>
+                <br/>
+                <button onClick={() => {
+                    const fetchedData: DataModel = {
+                        person: {
+                            fio: {
+                                surname: "sur1",
+                                name: "name1",
+                                patronymic: "patro1"
+                            }
+                        },
+                        todo: {
+                            text: "first"
+                        },
+                        textArray: [
+                            {
+                                inner: {value: '1'},
+                            },
+                            {
+                                inner: {value: '2'},
+                            },
+                            {
+                                inner: {value: '3'},
+                            },
+                            {
+                                inner: {value: '4'},
+                            }]
+                        ,
+                        innerTextArray: [
+                            {
+                                value: '88',
+                            },
+                            {
+                                value: '77',
+                            },
+                            {
+                                value: '66',
+                            },
+                            {
+                                value: '55',
+                            },
+                        ]
+                    };
+                    this.merge(fetchedData);
+                }}>
+                    fetch same inner text array same size
+                </button>
+                <br/>
+                <button onClick={() => {
+                    const fetchedData: DataModel = {
+                        person: {
+                            fio: {
+                                surname: "sur1",
+                                name: "name1",
+                                patronymic: "patro1"
+                            }
+                        },
+                        todo: {
+                            text: "first"
+                        },
+                        textArray: [
+                            {
+                                inner: {value: '1'},
+                            },
+                            {
+                                inner: {value: '2'},
+                            },
+                            {
+                                inner: {value: '3'},
+                            },
+                            {
+                                inner: {value: '4'},
+                            }]
+                        ,
+                        innerTextArray: [
+                            {
+                                value: '88',
+                            },
+                            {
+                                value: '77',
+                            },
+                            {
+                                value: '66',
+                            },
+                            {
+                                value: '55',
+                            },
+                            {
+                                value: '34534',
+                            },
+                        ]
+                    };
+                    this.merge(fetchedData);
+                }}>
+                    fetch same inner text array greater size
+                </button>
+                <br/>
+                <button onClick={() => {
+                    const fetchedData: DataModel = {
+                        person: {
+                            fio: {
+                                surname: "sur1",
+                                name: "name1",
+                                patronymic: "patro1"
+                            }
+                        },
+                        todo: {
+                            text: "first"
+                        },
+                        textArray: [
+                            {
+                                inner: {value: '1'},
+                            },
+                            {
+                                inner: {value: '2'},
+                            },
+                            {
+                                inner: {value: '3'},
+                            },
+                            {
+                                inner: {value: '4'},
+                            }]
+                        ,
+                        innerTextArray: [
+                            {
+                                value: '88',
+                            },
+                            {
+                                value: '77',
+                            },
+                            {
+                                value: '66',
+                            },
+                        ]
+                    };
+                    this.merge(fetchedData);
+                }}>
+                    fetch same inner text array less size
+                </button>
+                <br/>
             </div>
         )
     }
